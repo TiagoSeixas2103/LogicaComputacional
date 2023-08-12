@@ -1,2 +1,3 @@
-# LogicaComputacional
-Lógica da Computação - Tiago Vitorino Seixas
+# Lógica da Computação
+Servidor de Testes - Compilador
+Aluno: Tiago Vitorino Seixas
