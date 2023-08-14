@@ -16,8 +16,7 @@ for i in range(len(sys.argv[1])):
             valor -= numero
         numero = numero * 10
         numero += int(sys.argv[1][i])
-        print(numero)
-        
+
         if simbolo == "-":
             valor -= numero
         else:
