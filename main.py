@@ -1,21 +1,23 @@
 import sys
 
-valor = 0
+apareceu_numero = 0
 numero = 0
 simbolo = ""
-confirma_nulo = 0
+contagem = 0
 
-if sys.argv[1] == ' ':
-    confirma_nulo = 1
+for elemento in sys.argv[1]:
+    if elemento.isdigit() and not contagem:
+        apareceu_numero = 1
+        contagem = 1
+        valor = 0
 
-for i in range(len(sys.argv[1])):
-    if sys.argv[1][i].isdigit():
+    if elemento.isdigit():
         if simbolo == "-":
             valor += numero
         else:
             valor -= numero
         numero = numero * 10
-        numero += int(sys.argv[1][i])
+        numero += int(elemento)
 
         if simbolo == "-":
             valor -= numero
@@ -23,12 +25,11 @@ for i in range(len(sys.argv[1])):
             valor += numero
 
     else:
-        if sys.argv[1][i] == "+" or sys.argv[1][i] == "-":
-            simbolo = sys.argv[1][i]
+        if (elemento == "+" or elemento == "-") and apareceu_numero:
+            simbolo = elemento
             numero = 0
+        elif (elemento == "+" or elemento == "-") and (not apareceu_numero or contagem == 0):
+            valor = "erro"
+            break
 
-try: 
-    if not (confirma_nulo):
-        print(valor)
-except: 
-    print("erro")
+print(valor)
