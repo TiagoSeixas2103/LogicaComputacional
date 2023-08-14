@@ -29,5 +29,3 @@ for i in range(len(sys.argv[1])):
 
 if not (confirma_nulo):
     print(valor)
-if (confirma_nulo):
-    print("erro")
