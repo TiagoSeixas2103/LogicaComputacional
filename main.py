@@ -27,5 +27,8 @@ for i in range(len(sys.argv[1])):
             simbolo = sys.argv[1][i]
             numero = 0
 
-if not (confirma_nulo):
-    print(valor)
+try: 
+    if not (confirma_nulo):
+        print(valor)
+except: 
+    print("erro")
