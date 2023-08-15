@@ -14,7 +14,7 @@ for elemento in sys.argv[1]:
         apareceu_numero = 1
         contagem = 1
 
-    if elemento.isdigit():
+    elif elemento.isdigit() and contagem:
         if apareceu_espaco and not repete_simbolo:
             raise Exception("Numeros consecutivos")
         apareceu_espaco = 0
