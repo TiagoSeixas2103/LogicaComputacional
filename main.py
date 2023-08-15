@@ -14,7 +14,7 @@ for elemento in sys.argv[1]:
         apareceu_numero = 1
         contagem = 1
 
-    elif elemento.isdigit() and contagem:
+    if elemento.isdigit() and contagem:
         if apareceu_espaco and not repete_simbolo:
             raise Exception("Numeros consecutivos")
         apareceu_espaco = 0
@@ -39,7 +39,7 @@ for elemento in sys.argv[1]:
             simbolo = elemento
             numero = 0
             repete_simbolo = 1
-        elif (elemento == "+" or elemento == "-") and (not apareceu_numero or contagem == 0):
+        elif (elemento == "+" or elemento == "-") and (not apareceu_numero) or contagem == 0:
             raise Exception('Nao teve numero precedendo simbolo, ou foi string vazia')
         elif (elemento == " "):
             apareceu_espaco = 1
