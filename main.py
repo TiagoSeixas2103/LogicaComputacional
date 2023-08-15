@@ -1,6 +1,7 @@
 import sys
 
 apareceu_numero = 0
+apareceu_espaco = 0
 repete_simbolo = 0
 numero = 0
 simbolo = ""
@@ -14,6 +15,9 @@ for elemento in sys.argv[1]:
         contagem = 1
 
     if elemento.isdigit():
+        if apareceu_espaco and not repete_simbolo:
+            raise Exception("Numeros consecutivos")
+        apareceu_espaco = 0
         repete_simbolo = 0
         if simbolo == "-":
             valor += numero
@@ -31,11 +35,14 @@ for elemento in sys.argv[1]:
         if (elemento == "+" or elemento == "-") and apareceu_numero and elemento != "'":
             if repete_simbolo == 1:
                 raise Exception('Simbolos consecutivos')
+            apareceu_espaco = 0
             simbolo = elemento
             numero = 0
             repete_simbolo = 1
         elif (elemento == "+" or elemento == "-") and (not apareceu_numero or contagem == 0):
             raise Exception('Nao teve numero precedendo simbolo, ou foi string vazia')
+        elif (elemento == " "):
+            apareceu_espaco = 1
 
 if repete_simbolo == 1:
     raise Exception('Terminou em simbolo')
