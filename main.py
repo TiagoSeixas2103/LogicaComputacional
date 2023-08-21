@@ -1,50 +1,77 @@
 import sys
 
-apareceu_numero = 0
-apareceu_espaco = 0
-repete_simbolo = 0
-numero = 0
-simbolo = ""
-contagem = 0
-valor = 0
+class Token:
+    def __init__(self, type, value):
+        self.type = str (type)
+        self.value = None
 
-for elemento in sys.argv[1]:
-    if elemento.isdigit() and not contagem:
-        repete_simbolo = 0
-        apareceu_numero = 1
-        contagem = 1
+class Tokenizer:
+    def __init__(self, source, position, next):
+        self.source = str (source)
+        self.position = int (position)
+        self.next = Token("", None)
 
-    if elemento.isdigit() and contagem:
-        if apareceu_espaco and not repete_simbolo:
-            raise Exception("Numeros consecutivos")
-        apareceu_espaco = 0
-        repete_simbolo = 0
-        if simbolo == "-":
-            valor += numero
+    def selectNext(self):
+        while self.position < len(self.source) and self.source[self.position] == " ":
+            self.position += 1
+            
+        if self.position < len(self.source):
+            if self.source[self.position].isdigit():
+                self.next.type = "INT"
+                posicao = self.position+1
+                string = self.source[self.position]
+                while posicao < len(self.source) and self.source[posicao].isdigit():
+                    string += self.source[posicao]
+                    posicao +=1
+                self.next.value = int(string)
+                self.position = posicao - 1
+            elif self.source[self.position] == "+":
+                self.next.type = "PLUS"
+                self.next.value = None
+            elif self.source[self.position] == "-":
+                self.next.type = "MINUS"
+                self.next.value = None
+            self.position += 1
         else:
-            valor -= numero
-        numero = numero * 10
-        numero += int(elemento)
+            self.next.type = "EOF"
+            self.next.value = None
 
-        if simbolo == "-":
-            valor -= numero
-        else:
-            valor += numero
 
-    else:
-        if (elemento == "+" or elemento == "-") and apareceu_numero and elemento != "'":
-            if repete_simbolo == 1:
-                raise Exception('Simbolos consecutivos')
-            apareceu_espaco = 0
-            simbolo = elemento
-            numero = 0
-            repete_simbolo = 1
-        elif (elemento == "+" or elemento == "-") and (not apareceu_numero) or contagem == 0:
-            raise Exception('Nao teve numero precedendo simbolo, ou foi string vazia')
-        elif (elemento == " "):
-            apareceu_espaco = 1
+class Parser:
+    tokenizer = Tokenizer("", 0, Token("", None))
+    def parseExpression():
+        if Parser.tokenizer.next.value != None:
+            resultado = Parser.tokenizer.next.value
+            Parser.tokenizer.selectNext()
+            while Parser.tokenizer.next.type == "PLUS" or Parser.tokenizer.next.type == "MINUS":
+                if Parser.tokenizer.next.type == "PLUS":
+                    Parser.tokenizer.selectNext()
+                    if Parser.tokenizer.next.value != None:
+                        resultado += Parser.tokenizer.next.value
+                    else:
+                        raise Exception("ERRO")
+                if Parser.tokenizer.next.type == "MINUS":
+                    Parser.tokenizer.selectNext()
+                    if Parser.tokenizer.next.value != None:
+                        resultado -= Parser.tokenizer.next.value
+                    else:
+                        raise Exception("ERRO")
+                Parser.tokenizer.selectNext()
+            return resultado
+        raise Exception("ERRO")
+    
+    def run(code):
+        Parser.tokenizer.source = code
+        Parser.tokenizer.selectNext()
+        resultado = Parser.parseExpression()
+        if Parser.tokenizer.next.type != "EOF":
+            raise Exception("ERRO")
+        return resultado
+    
+def main():
+    resultado = Parser.run(sys.argv[1])
+    print(resultado)
 
-if repete_simbolo == 1:
-    raise Exception('Terminou em simbolo')
-
-print(valor)
+if __name__ == "__main__":
+    main()
+            
