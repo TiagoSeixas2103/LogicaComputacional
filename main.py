@@ -49,23 +49,23 @@ class Parser:
                     if Parser.tokenizer.next.value != None:
                         resultado += Parser.tokenizer.next.value
                     else:
-                        raise Exception("ERRO")
+                        raise Exception("Um numero deveria seguir token PLUS")
                 if Parser.tokenizer.next.type == "MINUS":
                     Parser.tokenizer.selectNext()
                     if Parser.tokenizer.next.value != None:
                         resultado -= Parser.tokenizer.next.value
                     else:
-                        raise Exception("ERRO")
+                        raise Exception("Um numero deveria seguir token MINUS")
                 Parser.tokenizer.selectNext()
             return resultado
-        raise Exception("ERRO")
+        raise Exception("Primeiro token nao eh numero")
     
     def run(code):
         Parser.tokenizer.source = code
         Parser.tokenizer.selectNext()
         resultado = Parser.parseExpression()
         if Parser.tokenizer.next.type != "EOF":
-            raise Exception("ERRO")
+            raise Exception("Deveria ser o fim da string")
         return resultado
     
 def main():
