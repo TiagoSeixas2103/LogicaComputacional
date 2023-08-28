@@ -31,6 +31,12 @@ class Tokenizer:
             elif self.source[self.position] == "-":
                 self.next.type = "MINUS"
                 self.next.value = None
+            elif self.source[self.position] == "*":
+                self.next.type = "MULT"
+                self.next.value = None
+            elif self.source[self.position] == "/":
+                self.next.type = "DIV"
+                self.next.value = None
             self.position += 1
         else:
             self.next.type = "EOF"
@@ -39,26 +45,46 @@ class Tokenizer:
 
 class Parser:
     tokenizer = Tokenizer("", 0, Token("", None))
-    def parseExpression():
+    def parseTerm():
         if Parser.tokenizer.next.value != None:
-            resultado = Parser.tokenizer.next.value
+            num = Parser.tokenizer.next.value
             Parser.tokenizer.selectNext()
-            while Parser.tokenizer.next.type == "PLUS" or Parser.tokenizer.next.type == "MINUS":
-                if Parser.tokenizer.next.type == "PLUS":
+            while Parser.tokenizer.next.type == "MULT" or Parser.tokenizer.next.type == "DIV":
+                if Parser.tokenizer.next.type == "MULT":
                     Parser.tokenizer.selectNext()
                     if Parser.tokenizer.next.value != None:
-                        resultado += Parser.tokenizer.next.value
+                        num *= Parser.tokenizer.next.value
                     else:
-                        raise Exception("Um numero deveria seguir token PLUS")
-                if Parser.tokenizer.next.type == "MINUS":
+                        raise Exception("Um numero deveria seguir token MULT")
+                if Parser.tokenizer.next.type == "DIV":
                     Parser.tokenizer.selectNext()
                     if Parser.tokenizer.next.value != None:
-                        resultado -= Parser.tokenizer.next.value
+                        num = num // Parser.tokenizer.next.value
                     else:
-                        raise Exception("Um numero deveria seguir token MINUS")
+                        raise Exception("Um numero deveria seguir token DIV")
                 Parser.tokenizer.selectNext()
-            return resultado
+            return num
         raise Exception("Primeiro token nao eh numero")
+
+    def parseExpression():
+        while Parser.tokenizer.next.value != None:
+            resultado = Parser.parseTerm()        
+            if Parser.tokenizer.next.type == "PLUS":
+                Parser.tokenizer.selectNext()
+                if Parser.tokenizer.next.value != None:
+                    resultado += Parser.tokenizer.next.value
+                else:
+                    raise Exception("Um numero deveria seguir token PLUS")
+            if Parser.tokenizer.next.type == "MINUS":
+                Parser.tokenizer.selectNext()
+                if Parser.tokenizer.next.value != None:
+                    resultado -= Parser.tokenizer.next.value
+                else:
+                    raise Exception("Um numero deveria seguir token MINUS")
+            Parser.tokenizer.selectNext()
+        return resultado
+
+
     
     def run(code):
         Parser.tokenizer.source = code
