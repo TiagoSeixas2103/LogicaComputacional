@@ -67,23 +67,15 @@ class Parser:
         raise Exception("Primeiro token nao eh numero")
 
     def parseExpression():
-        while Parser.tokenizer.next.value != None:
-            resultado = Parser.parseTerm()        
+        resultado = Parser.parseTerm() 
+        while Parser.tokenizer.next.type == "PLUS" or Parser.tokenizer.next.type == "MINUS":
             if Parser.tokenizer.next.type == "PLUS":
                 Parser.tokenizer.selectNext()
-                if Parser.tokenizer.next.value != None:
-                    resultado += Parser.tokenizer.next.value
-                else:
-                    raise Exception("Um numero deveria seguir token PLUS")
+                resultado += Parser.parseTerm()
             if Parser.tokenizer.next.type == "MINUS":
                 Parser.tokenizer.selectNext()
-                if Parser.tokenizer.next.value != None:
-                    resultado -= Parser.tokenizer.next.value
-                else:
-                    raise Exception("Um numero deveria seguir token MINUS")
-            Parser.tokenizer.selectNext()
+                resultado -= Parser.parseTerm()
         return resultado
-
 
     
     def run(code):
