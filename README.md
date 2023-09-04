@@ -3,3 +3,10 @@
 
 # Diagrama Sintatico
 ![alt text](img/diagramaSintatico.png)
+
+# EBNF
+```c
+EXPRESSION = TERM, { ("+" | "-"), TERM } ;
+TERM = FACTOR, { ("*" | "/"), FACTOR } ;
+FACTOR = ("+" | "-") FACTOR | "(" EXPRESSION ")" | number ;
+```
