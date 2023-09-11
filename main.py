@@ -5,6 +5,19 @@ class Token:
         self.type = str (type)
         self.value = None
 
+class PrePro:
+    def __init__(self, source, position):
+        self.source = str (source)
+        self.position = int (position)
+
+    def filter(self):
+        while self.position < len(self.source):
+            if self.source[self.position] == "/" and self.source[self.position + 1] == "/":
+                while self.position < len(self.source) and self.source[self.position] != "\n":
+                    self.source = self.source[0:self.position]
+            else:
+                self.position += 1
+
 class Tokenizer:
     def __init__(self, source, position, next):
         self.source = str (source)
@@ -16,12 +29,7 @@ class Tokenizer:
             self.position += 1
             
         if self.position < len(self.source):
-            if self.source[self.position] == "/":
-                self.position += 1
-                if self.source[self.position] == "/":
-                     while self.position < len(self.source) and self.source[self.position] != "\n":
-                        self.position += 1
-            elif self.source[self.position].isdigit():
+            if self.source[self.position].isdigit():
                 self.next.type = "INT"
                 posicao = self.position+1
                 string = self.source[self.position]
@@ -97,11 +105,11 @@ class Parser:
             return resultado
         elif Parser.tokenizer.next.type == "PLUS":
             Parser.tokenizer.selectNext()
-            resultado = UnOp("PLUS", Parser.parseFactor())
+            resultado = UnOp("PLUS", [Parser.parseFactor()])
             return resultado
         elif Parser.tokenizer.next.type == "MINUS":
             Parser.tokenizer.selectNext()
-            resultado = UnOp("MINUS", Parser.parseFactor())
+            resultado = UnOp("MINUS", [Parser.parseFactor()])
             return resultado
         elif Parser.tokenizer.next.type == "OPENPAR":
             Parser.tokenizer.selectNext()
@@ -121,7 +129,7 @@ class Parser:
                 resultado  = BinOp("MULT",[resultado, Parser.parseFactor()])
             if Parser.tokenizer.next.type == "DIV":
                 Parser.tokenizer.selectNext()
-                resultado  = BinOp("MULT",[resultado, Parser.parseFactor()])
+                resultado  = BinOp("DIV",[resultado, Parser.parseFactor()])
         return resultado
 
     def parseExpression():
@@ -137,7 +145,9 @@ class Parser:
 
     
     def run(code):
-        Parser.tokenizer.source = code
+        ProCode = PrePro(code, 0)
+        ProCode.filter()
+        Parser.tokenizer.source = ProCode.source
         Parser.tokenizer.selectNext()
         resultado = Parser.parseExpression()
         if Parser.tokenizer.next.type != "EOF":
