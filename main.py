@@ -16,7 +16,12 @@ class Tokenizer:
             self.position += 1
             
         if self.position < len(self.source):
-            if self.source[self.position].isdigit():
+            if self.source[self.position] == "/":
+                self.position += 1
+                if self.source[self.position] == "/":
+                     while self.position < len(self.source) and self.source[self.position] != "\n":
+                        self.position += 1
+            elif self.source[self.position].isdigit():
                 self.next.type = "INT"
                 posicao = self.position+1
                 string = self.source[self.position]
@@ -48,21 +53,55 @@ class Tokenizer:
             self.next.type = "EOF"
             self.next.value = None
 
+class Node:
+    def __init__(self, value, children):
+        self.value = value
+        self.children = children
+
+    def Evaluate(self):
+        pass
+    
+class BinOp(Node):
+    def Evaluate(self):
+        if self.value == "PLUS":   
+            return self.children[0].Evaluate() + self.children[1].Evaluate()
+        if self.value == "MINUS":   
+            return self.children[0].Evaluate() - self.children[1].Evaluate()
+        if self.value == "MULT":   
+            return self.children[0].Evaluate() * self.children[1].Evaluate()
+        if self.value == "DIV":   
+            return self.children[0].Evaluate() // self.children[1].Evaluate()
+
+class UnOp(Node):
+    def Evaluate(self):
+        if self.value == "PLUS":   
+            return self.children[0].Evaluate()
+        if self.value == "MINUS":   
+            return -self.children[0].Evaluate()
+
+class IntVal(Node):
+    def Evaluate(self):
+        return self.value
+
+class NoOp(Node):
+    def Evaluate(self):
+        pass
+        
 
 class Parser:
     tokenizer = Tokenizer("", 0, Token("", None))
     def parseFactor():        
         if Parser.tokenizer.next.value != None:
-            resultado = Parser.tokenizer.next.value
+            resultado = IntVal(Parser.tokenizer.next.value, None)
             Parser.tokenizer.selectNext()
             return resultado
         elif Parser.tokenizer.next.type == "PLUS":
             Parser.tokenizer.selectNext()
-            resultado = +Parser.parseFactor()
+            resultado = UnOp("PLUS", Parser.parseFactor())
             return resultado
         elif Parser.tokenizer.next.type == "MINUS":
             Parser.tokenizer.selectNext()
-            resultado = -Parser.parseFactor()
+            resultado = UnOp("MINUS", Parser.parseFactor())
             return resultado
         elif Parser.tokenizer.next.type == "OPENPAR":
             Parser.tokenizer.selectNext()
@@ -79,10 +118,10 @@ class Parser:
         while Parser.tokenizer.next.type == "MULT" or Parser.tokenizer.next.type == "DIV":
             if Parser.tokenizer.next.type == "MULT":
                 Parser.tokenizer.selectNext()
-                resultado *= Parser.parseFactor()
+                resultado  = BinOp("MULT",[resultado, Parser.parseFactor()])
             if Parser.tokenizer.next.type == "DIV":
                 Parser.tokenizer.selectNext()
-                resultado = resultado // Parser.parseFactor()
+                resultado  = BinOp("MULT",[resultado, Parser.parseFactor()])
         return resultado
 
     def parseExpression():
@@ -90,10 +129,10 @@ class Parser:
         while Parser.tokenizer.next.type == "PLUS" or Parser.tokenizer.next.type == "MINUS":
             if Parser.tokenizer.next.type == "PLUS":
                 Parser.tokenizer.selectNext()
-                resultado += Parser.parseTerm()
+                resultado = BinOp("PLUS",[resultado, Parser.parseTerm()])
             if Parser.tokenizer.next.type == "MINUS":
                 Parser.tokenizer.selectNext()
-                resultado -= Parser.parseTerm()
+                resultado = BinOp("MINUS",[resultado, Parser.parseTerm()])
         return resultado
 
     
@@ -106,8 +145,9 @@ class Parser:
         return resultado
     
 def main():
-    resultado = Parser.run(sys.argv[1])
-    print(resultado)
+    arquivo = open(sys.argv[1])
+    resultado = Parser.run(arquivo.read())
+    print(resultado.Evaluate())
 
 if __name__ == "__main__":
     main()
