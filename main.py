@@ -7,16 +7,26 @@ class Token:
 
 class PrePro:
     def __init__(self, source, position):
-        self.source = str (source)
+        self.source = source
         self.position = int (position)
 
     def filter(self):
-        while self.position < len(self.source):
+        file = open(self.source, "r")
+        linhas = file.readlines()
+        """ while self.position < len(self.source):
             if self.source[self.position] == "/" and self.source[self.position + 1] == "/":
                 while self.position < len(self.source) and self.source[self.position] != "\n":
-                    self.source = self.source[0:self.position]
+                    self.source = self.source.split(self.source[self.position])[0] + self.source.split(self.source[self.position])[1]
             else:
-                self.position += 1
+                self.position += 1 """
+        novas_linhas = []
+        for linha in linhas:
+            if "//" in linha:
+                novas_linhas.append(linha.split('//')[0] + "\n")
+            else:
+                novas_linhas.append(linha)
+        texto = "".join(novas_linhas)
+        return texto
 
 class Tokenizer:
     def __init__(self, source, position, next):
@@ -74,6 +84,9 @@ class Tokenizer:
                 self.next.value = None
             elif self.source[self.position] == "\n":
                 self.next.type = "ENTER"
+                self.next.value = None
+            else:
+                self.next.type = "ERROR"
                 self.next.value = None
             self.position += 1
         else:
@@ -237,10 +250,10 @@ class Parser:
         return resultado
 
     
-    def run(code):
-        ProCode = PrePro(code, 0)
-        ProCode.filter()
-        Parser.tokenizer.source = ProCode.source
+    def run(arquivo):
+        ProCode = PrePro(arquivo, 0)
+        texto = ProCode.filter()
+        Parser.tokenizer.source = texto
         Parser.tokenizer.selectNext()
         resultado = Parser.parseBlock()
         if Parser.tokenizer.next.type != "EOF":
@@ -249,8 +262,8 @@ class Parser:
     
 def main():
     Tabela = SymbolTable()
-    arquivo = open(sys.argv[1])
-    resultado = Parser.run(arquivo.read())
+    arquivo = sys.argv[1]
+    resultado = Parser.run(arquivo)
     resultado.Evaluate(Tabela)
 
 if __name__ == "__main__":
