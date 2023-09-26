@@ -335,7 +335,10 @@ class Parser:
                 Parser.tokenizer.selectNext()
                 newBlock = Parser.parseBlock()
                 resultado.children.append(newBlock)
-            return resultado
+            if Parser.tokenizer.next.type == "ENTER":
+                Parser.tokenizer.selectNext()
+                return resultado
+            raise Exception("faltou Enter depois do if")
         
         elif Parser.tokenizer.next.type == "FOR":
             Parser.tokenizer.selectNext()
@@ -358,7 +361,10 @@ class Parser:
                                     increment = Assignment("EQUAL", [Identifier(increment_ident_for, None), Parser.parseBoolExpression()])
                                     block_for = Parser.parseBlock()
                                     resultado = For("FOR", [init, condition_for, increment, block_for])
-                                    return resultado
+                                    if Parser.tokenizer.next.type == "ENTER":
+                                        Parser.tokenizer.selectNext()
+                                        return resultado
+                                    raise Exception("faltou Enter depois do for")
                                 raise Exception("Faltou atribuir valor incremento do for")
                             raise Exception("Faltou incremento do for")
                         raise Exception("Faltou ponto e virgula depois do condition do for")
