@@ -130,8 +130,8 @@ class SymbolTable:
         self.type = {}
 
     def get_ST(self, id):
-        if id in self.dicionario:
-            return self.dicionario[id]
+        if id in self.dicionario and id in self.type:
+            return (self.dicionario[id], self.type[id])
         else:
             raise Exception("Nao esta na Symbol Table")
     
@@ -145,8 +145,11 @@ class SymbolTable:
             raise Exception("Variavel nao declarada")
 
     def create_ST(self, id, type, value):
-        self.dicionario[id] = value
-        self.type[id] = type
+        if id not in self.dicionario:
+            self.dicionario[id] = value
+            self.type[id] = type
+        else:
+            raise Exception("variavel ja declarada")
 
 
 class Node:
@@ -161,18 +164,18 @@ class BinOp(Node):
     def Evaluate(self, SymbolTable):
         child_0 = self.children[0].Evaluate(SymbolTable)
         child_1 = self.children[1].Evaluate(SymbolTable)
-        if self.value == "PLUS":  
+        if self.value == "PLUS": 
             subchild = child_0[0] + child_1[0]
-            return (subchild, child_0[1])
+            return (subchild, "int")
         if self.value == "MINUS":   
             subchild = child_0[0] - child_1[0]
-            return (subchild, child_0[1])
+            return (subchild, "int")
         if self.value == "MULT":   
             subchild = child_0[0] * child_1[0]
-            return (subchild, child_0[1])
+            return (subchild, "int")
         if self.value == "DIV":   
             subchild = child_0[0] // child_1[0]
-            return (subchild, child_0[1])
+            return (subchild, "int")
         if self.value == "AND":
             subchild = child_0[0] and child_1[0] 
             if (subchild == True):
@@ -189,8 +192,8 @@ class BinOp(Node):
                 return (0, "int")
             else:
                 raise Exception("Tipos incompativeis")
-        if self.value == "EQUALTO":   
-            subchild = child_0[0] == child_1[0] 
+        if self.value == "EQUALTO": 
+            subchild = (child_0[0] == child_1[0])
             if (subchild == True):
                 return (1, "int")
             elif (subchild == False):
@@ -213,16 +216,28 @@ class BinOp(Node):
                 return (0, "int")
             else:
                 raise Exception("Tipos incompativeis")
-        if self.value == "DOT":
+        elif self.value == "DOT":
             subchild = str(child_0[0]) + str(child_1[0])
             return (subchild, "string")
+        else:
+            raise Exception("Operacao invalida")
 
 class UnOp(Node):
     def Evaluate(self, SymbolTable):
         if self.value == "PLUS":   
-            return self.children[0].Evaluate(SymbolTable)
-        if self.value == "MINUS":   
-            return -self.children[0].Evaluate(SymbolTable)
+            return (self.children[0].Evaluate(SymbolTable)[0], "int")
+        elif self.value == "MINUS": 
+            negative = -self.children[0].Evaluate(SymbolTable)[0] 
+            return (negative, "int")
+        elif self.value == "NOT":
+            bol = not self.children[0].Evaluate(SymbolTable)[0]
+            if (bol == True):
+                return (1, "int")
+            elif (bol == False):
+                return (0, "int")
+            else:
+                raise Exception("Not nao se aplica")
+            
 
 class IntVal(Node):
     def Evaluate(self, SymbolTable):
@@ -235,7 +250,7 @@ class StrVal(Node):
 class VarDec(Node):
     def Evaluate(self, SymbolTable):
         if self.children[2] != None:
-            SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable))
+            SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable)[0])
         else:
             SymbolTable.create_ST(self.children[0], self.children[1], None)
 
@@ -259,7 +274,7 @@ class Block(Node):
         
 class Println(Node):
     def Evaluate(self, SymbolTable):
-        print(self.children[0].Evaluate(SymbolTable)) 
+        print(self.children[0].Evaluate(SymbolTable)[0]) 
 
 class If(Node):
     def Evaluate(self, SymbolTable):
