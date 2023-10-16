@@ -33,6 +33,9 @@ class Tokenizer:
             "if" : "IF",
             "for" : "FOR",
             "else" : "ELSE",
+            "var" : "VARIABLE",
+            "int" : "INTTYPE",
+            "string" : "STRINGTYPE",
         }
         self.tipos = {
             "+" : "PLUS",
@@ -48,6 +51,7 @@ class Tokenizer:
             "{" : "OPENKEY",
             "}" : "CLOSEKEY",
             ";" : "SEMICOLON",
+            "." : "DOT",
         }
 
     def selectNext(self):
@@ -101,6 +105,17 @@ class Tokenizer:
             elif self.source[self.position] in self.tipos.keys():
                 self.next.type = self.tipos[self.source[self.position]]
                 self.next.value = None
+            elif self.source[self.position] == '"':
+                self.position += 1
+                string = ""
+                while self.position < len(self.source) and (self.source[self.position] != '"' and self.source[self.position] != '\n'):
+                    string += self.source[self.position]
+                    self.position +=1
+                if self.source[self.position] == '"':
+                    self.next.value = string
+                    self.next.type = "STRING"
+                else:
+                    raise Exception("Nao fechou string")
             else:
                 self.next.type = "ERROR"
                 self.next.value = None
@@ -112,6 +127,7 @@ class Tokenizer:
 class SymbolTable:
     def __init__(self):
         self.dicionario = {}
+        self.type = {}
 
     def get_ST(self, id):
         if id in self.dicionario:
@@ -120,7 +136,18 @@ class SymbolTable:
             raise Exception("Nao esta na Symbol Table")
     
     def set_ST(self, id, value):
+        if id in self.type:
+            if self.type[id] == value[1]:
+                self.dicionario[id] = value[0]
+            else:
+                raise Exception("Variavel do tipo errado")
+        else:
+            raise Exception("Variavel nao declarada")
+
+    def create_ST(self, id, type, value):
         self.dicionario[id] = value
+        self.type[id] = type
+
 
 class Node:
     def __init__(self, value, children):
@@ -132,24 +159,63 @@ class Node:
     
 class BinOp(Node):
     def Evaluate(self, SymbolTable):
+        child_0 = self.children[0].Evaluate(SymbolTable)
+        child_1 = self.children[1].Evaluate(SymbolTable)
         if self.value == "PLUS":  
-            return self.children[0].Evaluate(SymbolTable) + self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] + child_1[0]
+            return (subchild, child_0[1])
         if self.value == "MINUS":   
-            return self.children[0].Evaluate(SymbolTable) - self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] - child_1[0]
+            return (subchild, child_0[1])
         if self.value == "MULT":   
-            return self.children[0].Evaluate(SymbolTable) * self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] * child_1[0]
+            return (subchild, child_0[1])
         if self.value == "DIV":   
-            return self.children[0].Evaluate(SymbolTable) // self.children[1].Evaluate(SymbolTable)
-        if self.value == "AND":   
-            return self.children[0].Evaluate(SymbolTable) and self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] // child_1[0]
+            return (subchild, child_0[1])
+        if self.value == "AND":
+            subchild = child_0[0] and child_1[0] 
+            if (subchild == True):
+                return (1, "int")
+            elif (subchild == False):
+                return (0, "int")
+            else:
+                raise Exception("Tipos incompativeis")
         if self.value == "OR":   
-            return self.children[0].Evaluate(SymbolTable) or self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] or child_1[0] 
+            if (subchild == True):
+                return (1, "int")
+            elif (subchild == False):
+                return (0, "int")
+            else:
+                raise Exception("Tipos incompativeis")
         if self.value == "EQUALTO":   
-            return self.children[0].Evaluate(SymbolTable) == self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] == child_1[0] 
+            if (subchild == True):
+                return (1, "int")
+            elif (subchild == False):
+                return (0, "int")
+            else:
+                raise Exception("Tipos incompativeis")
         if self.value == "GREATERTHAN":   
-            return self.children[0].Evaluate(SymbolTable) > self.children[1].Evaluate(SymbolTable)
-        if self.value == "LOWERTHAN":   
-            return self.children[0].Evaluate(SymbolTable) < self.children[1].Evaluate(SymbolTable)
+            subchild = child_0[0] > child_1[0] 
+            if (subchild == True):
+                return (1, "int")
+            elif (subchild == False):
+                return (0, "int")
+            else:
+                raise Exception("Tipos incompativeis")
+        if self.value == "LOWERTHAN": 
+            subchild = child_0[0] < child_1[0] 
+            if (subchild == True):
+                return (1, "int")
+            elif (subchild == False):
+                return (0, "int")
+            else:
+                raise Exception("Tipos incompativeis")
+        if self.value == "DOT":
+            subchild = str(child_0[0]) + str(child_1[0])
+            return (subchild, "string")
 
 class UnOp(Node):
     def Evaluate(self, SymbolTable):
@@ -160,7 +226,18 @@ class UnOp(Node):
 
 class IntVal(Node):
     def Evaluate(self, SymbolTable):
-        return self.value
+        return (self.value, "int")
+    
+class StrVal(Node):
+    def Evaluate(self, SymbolTable):
+        return (self.value, "string")
+    
+class VarDec(Node):
+    def Evaluate(self, SymbolTable):
+        if self.children[2] != None:
+            SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable))
+        else:
+            SymbolTable.create_ST(self.children[0], self.children[1], None)
 
 class NoOp(Node):
     def Evaluate(self, SymbolTable):
@@ -204,6 +281,10 @@ class Parser:
     def parseFactor():       
         if Parser.tokenizer.next.type == "INT":
             resultado = IntVal(Parser.tokenizer.next.value, None)
+            Parser.tokenizer.selectNext()
+            return resultado
+        if Parser.tokenizer.next.type == "STRING":
+            resultado = StrVal(Parser.tokenizer.next.value, None)
             Parser.tokenizer.selectNext()
             return resultado
         elif Parser.tokenizer.next.type == "IDENTIFIER":
@@ -255,13 +336,21 @@ class Parser:
 
     def parseExpression():
         resultado = Parser.parseTerm() 
-        while Parser.tokenizer.next.type == "PLUS" or Parser.tokenizer.next.type == "MINUS":
+        dict = {
+            "PLUS" : "PLUS",
+            "MINUS" : "MINUS",
+            "DOT" : "DOT",
+            }
+        while Parser.tokenizer.next.type in dict:
             if Parser.tokenizer.next.type == "PLUS":
                 Parser.tokenizer.selectNext()
                 resultado = BinOp("PLUS",[resultado, Parser.parseTerm()])
             if Parser.tokenizer.next.type == "MINUS":
                 Parser.tokenizer.selectNext()
                 resultado = BinOp("MINUS",[resultado, Parser.parseTerm()])
+            if Parser.tokenizer.next.type == "DOT":
+                Parser.tokenizer.selectNext()
+                resultado = BinOp("DOT",[resultado, Parser.parseTerm()])
         return resultado
     
     def parseRelationalExpression():
@@ -372,6 +461,25 @@ class Parser:
                 raise Exception("Nao atribuiu valor no init do for")
             raise Exception("Sem init do for")
         
+        elif Parser.tokenizer.next.type == "VARIABLE":
+            Parser.tokenizer.selectNext()
+            if Parser.tokenizer.next.type == "IDENTIFIER":
+                valor_ident_var = Parser.tokenizer.next.value
+                Parser.tokenizer.selectNext()
+                if Parser.tokenizer.next.type == "INTTYPE" or Parser.tokenizer.next.type == "STRINGTYPE":
+                    valor_type_var = Parser.tokenizer.next.value
+                    Parser.tokenizer.selectNext()
+                    if Parser.tokenizer.next.type == "EQUAL":
+                        Parser.tokenizer.selectNext()
+                        resultado = VarDec("VARIABLE", [valor_ident_var, valor_type_var, Parser.parseBoolExpression()])
+                    else:
+                        resultado = VarDec("VARIABLE", [valor_ident_var, valor_type_var, None])
+
+                    if Parser.tokenizer.next.type == "ENTER":
+                        Parser.tokenizer.selectNext()
+                        return resultado
+                    
+
         raise Exception("Nao usou uma funcionalidade") 
             
 
