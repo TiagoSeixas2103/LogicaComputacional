@@ -164,58 +164,59 @@ class BinOp(Node):
     def Evaluate(self, SymbolTable):
         child_0 = self.children[0].Evaluate(SymbolTable)
         child_1 = self.children[1].Evaluate(SymbolTable)
-        if self.value == "PLUS": 
-            subchild = child_0[0] + child_1[0]
-            return (subchild, "int")
-        if self.value == "MINUS":   
-            subchild = child_0[0] - child_1[0]
-            return (subchild, "int")
-        if self.value == "MULT":   
-            subchild = child_0[0] * child_1[0]
-            return (subchild, "int")
-        if self.value == "DIV":   
-            subchild = child_0[0] // child_1[0]
-            return (subchild, "int")
-        if self.value == "AND":
-            subchild = child_0[0] and child_1[0] 
-            if (subchild == True):
-                return (1, "int")
-            elif (subchild == False):
-                return (0, "int")
-            else:
-                raise Exception("Tipos incompativeis")
-        if self.value == "OR":   
-            subchild = child_0[0] or child_1[0] 
-            if (subchild == True):
-                return (1, "int")
-            elif (subchild == False):
-                return (0, "int")
-            else:
-                raise Exception("Tipos incompativeis")
-        if self.value == "EQUALTO": 
-            subchild = (child_0[0] == child_1[0])
-            if (subchild == True):
-                return (1, "int")
-            elif (subchild == False):
-                return (0, "int")
-            else:
-                raise Exception("Tipos incompativeis")
-        if self.value == "GREATERTHAN":   
-            subchild = child_0[0] > child_1[0] 
-            if (subchild == True):
-                return (1, "int")
-            elif (subchild == False):
-                return (0, "int")
-            else:
-                raise Exception("Tipos incompativeis")
-        if self.value == "LOWERTHAN": 
-            subchild = child_0[0] < child_1[0] 
-            if (subchild == True):
-                return (1, "int")
-            elif (subchild == False):
-                return (0, "int")
-            else:
-                raise Exception("Tipos incompativeis")
+        if child_0[1] == child_1[1]:
+            if self.value == "PLUS": 
+                subchild = child_0[0] + child_1[0]
+                return (subchild, "int")
+            if self.value == "MINUS":   
+                subchild = child_0[0] - child_1[0]
+                return (subchild, "int")
+            if self.value == "MULT":   
+                subchild = child_0[0] * child_1[0]
+                return (subchild, "int")
+            if self.value == "DIV":   
+                subchild = child_0[0] // child_1[0]
+                return (subchild, "int")
+            if self.value == "AND":
+                subchild = child_0[0] and child_1[0] 
+                if (subchild == True):
+                    return (1, "int")
+                elif (subchild == False):
+                    return (0, "int")
+                else:
+                    raise Exception("Tipos incompativeis")
+            if self.value == "OR":   
+                subchild = child_0[0] or child_1[0] 
+                if (subchild == True):
+                    return (1, "int")
+                elif (subchild == False):
+                    return (0, "int")
+                else:
+                    raise Exception("Tipos incompativeis")
+            if self.value == "EQUALTO": 
+                subchild = child_0[0] == child_1[0]
+                if (subchild == True):
+                    return (1, "int")
+                elif (subchild == False):
+                    return (0, "int")
+                else:
+                    raise Exception("Tipos incompativeis")
+            if self.value == "GREATERTHAN":   
+                subchild = child_0[0] > child_1[0] 
+                if (subchild == True):
+                    return (1, "int")
+                elif (subchild == False):
+                    return (0, "int")
+                else:
+                    raise Exception("Tipos incompativeis")
+            if self.value == "LOWERTHAN": 
+                subchild = child_0[0] < child_1[0] 
+                if (subchild == True):
+                    return (1, "int")
+                elif (subchild == False):
+                    return (0, "int")
+                else:
+                    raise Exception("Tipos incompativeis")
         elif self.value == "DOT":
             subchild = str(child_0[0]) + str(child_1[0])
             return (subchild, "string")
@@ -423,10 +424,10 @@ class Parser:
                 resultado = Println("PRINT", [Parser.parseBoolExpression()])
                 if Parser.tokenizer.next.type == "CLOSEPAR":
                     Parser.tokenizer.selectNext()
-                    if Parser.tokenizer.next.type == "ENTER":
-                        Parser.tokenizer.selectNext()
-                        return resultado
-                    raise Exception("Nao deu Enter depois do print")
+                    #if Parser.tokenizer.next.type == "ENTER":
+                    #    Parser.tokenizer.selectNext()
+                    return resultado
+                    #raise Exception("Nao deu Enter depois do print")
                 raise Exception("Nao fechou parenteses")
             raise Exception("Nao abriu parenteses")
         
