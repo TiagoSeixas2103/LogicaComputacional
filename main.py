@@ -217,6 +217,9 @@ class BinOp(Node):
                     return (0, "int")
                 else:
                     raise Exception("Tipos incompativeis")
+            if self.value == "DOT":
+                subchild = str(child_0[0]) + str(child_1[0])
+                return (subchild, "string")
         elif self.value == "DOT":
             subchild = str(child_0[0]) + str(child_1[0])
             return (subchild, "string")
@@ -288,7 +291,7 @@ class If(Node):
 class For(Node):
     def Evaluate(self, SymbolTable):
         self.children[0].Evaluate(SymbolTable)
-        while (self.children[1].Evaluate(SymbolTable)):
+        while (self.children[1].Evaluate(SymbolTable) == 1):
             self.children[3].Evaluate(SymbolTable)
             self.children[2].Evaluate(SymbolTable)
 
@@ -424,10 +427,7 @@ class Parser:
                 resultado = Println("PRINT", [Parser.parseBoolExpression()])
                 if Parser.tokenizer.next.type == "CLOSEPAR":
                     Parser.tokenizer.selectNext()
-                    #if Parser.tokenizer.next.type == "ENTER":
-                    #    Parser.tokenizer.selectNext()
                     return resultado
-                    #raise Exception("Nao deu Enter depois do print")
                 raise Exception("Nao fechou parenteses")
             raise Exception("Nao abriu parenteses")
         
