@@ -291,7 +291,7 @@ class If(Node):
 class For(Node):
     def Evaluate(self, SymbolTable):
         self.children[0].Evaluate(SymbolTable)
-        while (self.children[1].Evaluate(SymbolTable) == 1):
+        while (self.children[1].Evaluate(SymbolTable)[0] == 1):
             self.children[3].Evaluate(SymbolTable)
             self.children[2].Evaluate(SymbolTable)
 
