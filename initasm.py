@@ -45,8 +45,8 @@ class InitializeASM:
         "main:\n", 
         "\n" 
     ]
-    def writeInitASM():
-        with open("program.asm", "a") as assemblyFile:
+    def writeInitASM(program):
+        with open(program, "a") as assemblyFile:
             for string in InitializeASM.list_init:
                 assemblyFile.write(string)
             assemblyFile.close()

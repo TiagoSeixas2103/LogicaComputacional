@@ -1,5 +1,6 @@
 class WriteASM:
+    program = "program.asm"
     def write(string):
-        with open("program.asm", "a") as assemblyFile:
+        with open(WriteASM.program, "a") as assemblyFile:
             assemblyFile.write(string)
             assemblyFile.close()

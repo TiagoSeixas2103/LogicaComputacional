@@ -6,8 +6,8 @@ class FinalizeASM:
         "MOV EAX, 1\n",
         "INT 0x80\n",
     ]
-    def writeEndASM():
-        with open("program.asm", "a") as assemblyFile:
+    def writeEndASM(program):
+        with open(program, "a") as assemblyFile:
             for string in FinalizeASM.list_init:
                 assemblyFile.write(string)
             assemblyFile.close()
