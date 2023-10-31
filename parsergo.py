@@ -43,7 +43,8 @@ class Parser:
                 Parser.tokenizer.selectNext()
                 if Parser.tokenizer.next.type == "CLOSEPAR":
                     Parser.tokenizer.selectNext()
-                    resultado = IntVal(int(input()), None)
+                    #resultado = IntVal(int(input()), ["scan"])
+                    resultado = IntVal(0, ["scan"])
                     return resultado
                 raise Exception("Nao fechou parenteses no scan")
             raise Exception("Nao abriu parenteses no scan")
