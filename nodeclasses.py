@@ -194,18 +194,20 @@ class If(Node):
         #    if len(self.children) > 2:
         #        return self.children[2].Evaluate(SymbolTable)
         self.children[0].Evaluate(SymbolTable)
-        string = "CMP EAX, True\n"
+        string = "CMP EAX, True ; \n"
         WriteASM.write(string)
-        string = "JNE LABEL_ELSE\n"
+        id = Node.newId()
+        string = "JNE LABEL_ELSE_" + str(id) +"\n"
         WriteASM.write(string)
         self.children[1].Evaluate(SymbolTable)
-        string = "JMP EXIT\n"
+        string = "JMP EXIT ; \n"
         WriteASM.write(string)
-        string = "LABEL_ELSE\n"
+        string = "LABEL_ELSE_" + str(id) +":\n"
         WriteASM.write(string)
         if len(self.children) > 2:
-            self.children[2].Evaluate(SymbolTable)
-        string = "EXIT\n\n"
+            childELSE = self.children[2].Evaluate(SymbolTable)
+            print(childELSE)
+        string = "EXIT:\n\n"
         WriteASM.write(string)
 
 
@@ -213,7 +215,7 @@ class For(Node):
     def Evaluate(self, SymbolTable):
         self.children[0].Evaluate(SymbolTable)
         id = Node.newId()
-        string = "LOOP_" + str(id) +" ; \n\n"
+        string = "LOOP_" + str(id) +":\n\n"
         WriteASM.write(string)
         #while (self.children[1].Evaluate(SymbolTable)[0] == 1):
         #    self.children[3].Evaluate(SymbolTable)
@@ -227,5 +229,5 @@ class For(Node):
         self.children[2].Evaluate(SymbolTable)
         string = "JMP LOOP_" + str(id) +" ; \n"
         WriteASM.write(string)
-        string = "EXIT_" + str(id) +" ; \n"
+        string = "EXIT_" + str(id) +":\n"
         WriteASM.write(string)

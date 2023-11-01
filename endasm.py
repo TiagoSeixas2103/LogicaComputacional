@@ -1,9 +1,14 @@
 class FinalizeASM:
     list_init = [
         "\n",
-        "; interrupcao de saida ( default )\n",
+        "; depois que terminar de gerar o código:\n",
+        "PUSH DWORD [stdout]\n",
+        "CALL fflush\n",
+        "ADD ESP, 4\n",
+        "MOV ESP, EBP\n",
         "POP EBP\n",
         "MOV EAX, 1\n",
+        "XOR EBX, EBX\n",
         "INT 0x80\n",
     ]
     def writeEndASM(program):
