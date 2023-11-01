@@ -200,14 +200,14 @@ class If(Node):
         string = "JNE LABEL_ELSE_" + str(id) +"\n"
         WriteASM.write(string)
         self.children[1].Evaluate(SymbolTable)
-        string = "JMP EXIT ; \n"
+        string = "JMP EXIT_" + str(id) +" ; \n"
         WriteASM.write(string)
         string = "LABEL_ELSE_" + str(id) +":\n"
         WriteASM.write(string)
         if len(self.children) > 2:
             childELSE = self.children[2].Evaluate(SymbolTable)
             print(childELSE)
-        string = "EXIT:\n\n"
+        string = "EXIT_" + str(id) +":\n\n"
         WriteASM.write(string)
 
 
