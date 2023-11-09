@@ -94,10 +94,16 @@ class StrVal(Node):
 
 class VarDec(Node):
     def Evaluate(self, SymbolTable, FuncTable):
-        if self.children[2] != None:
-            SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable, FuncTable)[0])
+        if self.value == "FUNCTION_VARIABLE":
+            FuncTable.create_ST(self.children[0], self.children[1], None)
+            return self.children[0]
         else:
-            SymbolTable.create_ST(self.children[0], self.children[1], None)
+            if self.children[2] != None:
+                SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable, FuncTable)[0])
+                return self.children[0]
+            else:
+                SymbolTable.create_ST(self.children[0], self.children[1], None)
+                return self.children[0]
 
 class NoOp(Node):
     def Evaluate(self, SymbolTable, FuncTable):
@@ -138,18 +144,24 @@ class For(Node):
 
 class FuncDec(Node):
     def Evaluate(self, SymbolTable, FuncTable):
-        child_0 = self.children[0].Evaluate(FuncTable)
-        FuncTable.create_ST(child_0[0], child_0[1], child_0)
+        child_0 = self.children[0].Evaluate(SymbolTable, FuncTable)
+        FuncTable.set_ST(child_0, self)
 
 class FuncCall(Node):
     def Evaluate(self, ST, FuncTable):
         node, type = FuncTable.get_ST(self.value)
         funcSymbolTable = SymbolTable()
-        for i in len(node.children) - 1:
-            node.children[i+1].Evaluate(funcSymbolTable, FuncTable)
-            funcSymbolTable.create_ST(self.children[i].Evaluate(funcSymbolTable, FuncTable))
+        if len(node.children) > 2:
+            for i in range(len(node.children) - 2):
+                vardec = node.children[i+1].Evaluate(funcSymbolTable, FuncTable)
+                child_i = self.children[i].Evaluate(ST, FuncTable)
+                funcSymbolTable.set_ST(vardec, child_i)
+        
         node.children[-1].Evaluate(funcSymbolTable, FuncTable)
+        return_value = funcSymbolTable.get_ST("RETURN")
+        return return_value
 
 class FuncReturn(Node):
     def Evaluate(self, SymbolTable, FuncTable):
-        FuncTable.set_ST(self.children[0].value, self.children[1].Evaluate(FuncTable)) 
+        child_0 = self.children[0].Evaluate(SymbolTable, FuncTable)
+        SymbolTable.create_ST(self.value, child_0[1], child_0[0]) 

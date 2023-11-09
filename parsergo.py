@@ -5,7 +5,7 @@ from nodeclasses import Identifier, Assignment, Block, Println, If, For, FuncDec
 
 class Parser:
     tokenizer = Tokenizer("", 0, Token("", None))
-    def parseFactor():       
+    def parseFactor():
         if Parser.tokenizer.next.type == "INT":
             resultado = IntVal(Parser.tokenizer.next.value, None)
             Parser.tokenizer.selectNext()
@@ -22,20 +22,17 @@ class Parser:
                 if Parser.tokenizer.next.type == "CLOSEPAR":
                     resultado = FuncCall(valor_ident, None)
                     Parser.tokenizer.selectNext()
-                    if Parser.tokenizer.next.type == "ENTER":
-                        Parser.tokenizer.selectNext()
-                        return resultado
-                    raise Exception("Nao deu Enter depois do assignment da funcao")
+                    return resultado
                 else:
                     resultado = FuncCall(valor_ident, [Parser.parseBoolExpression()])
                     if Parser.tokenizer.next.type == "COMA":
                         while Parser.tokenizer.next.type == "COMA":
-                            resultado.children.append(Parser.parseBoolExpression())
-                    if Parser.tokenizer.next.type == "CLOSEPAR":
-                        if Parser.tokenizer.next.type == "ENTER":
                             Parser.tokenizer.selectNext()
-                            return resultado
-                        raise Exception("Nao deu Enter depois do assignment da funcao com args")
+                            new_child = Parser.parseBoolExpression()
+                            resultado.children.append(new_child)
+                    if Parser.tokenizer.next.type == "CLOSEPAR":
+                        Parser.tokenizer.selectNext()
+                        return resultado
                     raise Exception("Nao fechou parenteses da funcao com args")
             resultado = Identifier(valor_ident, None)
             return resultado
@@ -160,8 +157,10 @@ class Parser:
                     resultado = FuncCall(valor_ident, [Parser.parseBoolExpression()])
                     if Parser.tokenizer.next.type == "COMA":
                         while Parser.tokenizer.next.type == "COMA":
+                            Parser.tokenizer.selectNext()
                             resultado.children.append(Parser.parseBoolExpression())
                     if Parser.tokenizer.next.type == "CLOSEPAR":
+                        Parser.tokenizer.selectNext()
                         if Parser.tokenizer.next.type == "ENTER":
                             Parser.tokenizer.selectNext()
                             return resultado
@@ -244,14 +243,12 @@ class Parser:
                     if Parser.tokenizer.next.type == "ENTER":
                         Parser.tokenizer.selectNext()
                         return resultado
-
         elif Parser.tokenizer.next.type == "RETURN":
             Parser.tokenizer.selectNext()
             resultado = FuncReturn("RETURN", [Parser.parseBoolExpression()])
             if Parser.tokenizer.next.type == "ENTER":
                 Parser.tokenizer.selectNext()
                 return resultado
-
         raise Exception("Nao usou uma funcionalidade") 
 
 
@@ -271,7 +268,12 @@ class Parser:
         raise Exception("Nao abriu chaves")
 
     def parseDeclaration():
-        if Parser.tokenizer.next.type == "FUNCTION":
+        resultado = NoOp(None, [])
+        if Parser.tokenizer.next.type == "ENTER":
+            Parser.tokenizer.selectNext()
+            return resultado
+        
+        elif Parser.tokenizer.next.type == "FUNCTION":
             Parser.tokenizer.selectNext()
             if Parser.tokenizer.next.type == "IDENTIFIER":
                 function_iden = Parser.tokenizer.next.value
@@ -284,7 +286,7 @@ class Parser:
                             function_type = Parser.tokenizer.next.value
                             Parser.tokenizer.selectNext()
                             block = Parser.parseBlock()
-                            funcDec = VarDec("VARIABLE", [function_iden, function_type, None])
+                            funcDec = VarDec("FUNCTION_VARIABLE", [function_iden, function_type, None])
                             resultado = FuncDec("FUNCTION", [funcDec, block])
                             if Parser.tokenizer.next.type == "ENTER":
                                 Parser.tokenizer.selectNext()
@@ -310,15 +312,17 @@ class Parser:
                                             var_dec = VarDec("VARIABLE", [var_iden, var_type, None])
                                             var_dec_list.append(var_dec)
                                             Parser.tokenizer.selectNext()
-                                        raise Exception("Faltou tipo do argumento da funcao")
-                                    raise Exception("Faltou identifier do argumento da funcao")        
+                                        else:
+                                            raise Exception("Faltou tipo do argumento da funcao 2")
+                                    else:
+                                        raise Exception("Faltou identifier do argumento da funcao")        
                             if Parser.tokenizer.next.type == "CLOSEPAR":
                                 Parser.tokenizer.selectNext()
                                 if Parser.tokenizer.next.type == "INTTYPE" or Parser.tokenizer.next.type == "STRINGTYPE":
                                     function_type = Parser.tokenizer.next.value
                                     Parser.tokenizer.selectNext()
                                     block = Parser.parseBlock()
-                                    funcDec = VarDec("VARIABLE", [function_iden, function_type, None])
+                                    funcDec = VarDec("FUNCTION_VARIABLE", [function_iden, function_type, None])
                                     resultado = FuncDec("FUNCTION", [funcDec])
                                     for variable in var_dec_list:
                                         resultado.children.append(variable)
@@ -338,8 +342,8 @@ class Parser:
     def parseProgram():
         resultado = Block(None, [])
         while Parser.tokenizer.next.type != "EOF":
-            resultado.children.append(Parser.parseStatement())
-        #resultado.children.append(FuncCall)
+            resultado.children.append(Parser.parseDeclaration())
+        resultado.children.append(FuncCall("main", None))
         return resultado
 
 

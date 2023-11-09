@@ -7,20 +7,17 @@ class FuncTable:
         if id in self.dicionario and id in self.type:
             return (self.dicionario[id], self.type[id])
         else:
-            raise Exception("Nao esta na Symbol Table")
+            raise Exception("Nao esta na Func Table")
 
     def set_ST(self, id, value):
-        if id in self.type:
-            if self.type[id] == value[1]:
-                self.dicionario[id] = value[0]
-            else:
-                raise Exception("Variavel do tipo errado")
+        if id in self.type and id in self.dicionario:
+            self.dicionario[id] = value
         else:
-            raise Exception("Variavel nao declarada")
+            raise Exception("Funcao nao declarada")
 
     def create_ST(self, id, type, value):
         if id not in self.dicionario:
             self.dicionario[id] = value
             self.type[id] = type
         else:
-            raise Exception("variavel ja declarada")
+            raise Exception("Funcao ja declarada")
