@@ -158,8 +158,9 @@ class FuncCall(Node):
                 funcSymbolTable.set_ST(vardec, child_i)
         
         node.children[-1].Evaluate(funcSymbolTable, FuncTable)
-        return_value = funcSymbolTable.get_ST("RETURN")
-        return return_value
+        if self.value != "main":
+            return_value = funcSymbolTable.get_ST("RETURN")
+            return return_value
 
 class FuncReturn(Node):
     def Evaluate(self, SymbolTable, FuncTable):
