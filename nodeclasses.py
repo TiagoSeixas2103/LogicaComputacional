@@ -99,6 +99,8 @@ class VarDec(Node):
             return self.children[0]
         else:
             if self.children[2] != None:
+                if self.children[1] != self.children[2].Evaluate(SymbolTable, FuncTable)[1]:
+                    raise Exception("tipo da variavel diferente")
                 SymbolTable.create_ST(self.children[0], self.children[1], self.children[2].Evaluate(SymbolTable, FuncTable)[0])
                 return self.children[0]
             else:
@@ -152,13 +154,19 @@ class FuncCall(Node):
         node, type = FuncTable.get_ST(self.value)
         funcSymbolTable = SymbolTable()
         if len(node.children) > 2:
+            if len(self.children) != (len(node.children) - 2):
+                raise Exception("numero de argumentos da funcao errado")
             for i in range(len(node.children) - 2):
                 vardec = node.children[i+1].Evaluate(funcSymbolTable, FuncTable)
                 child_i = self.children[i].Evaluate(ST, FuncTable)
                 funcSymbolTable.set_ST(vardec, child_i)
         
         node.children[-1].Evaluate(funcSymbolTable, FuncTable)
-        if self.value != "main":
+        if "RETURN" in funcSymbolTable.dicionario:
+            if type != funcSymbolTable.type["RETURN"]:
+                raise Exception("Tipos incompativeis")
+            if self.value == "main":
+                raise Exception("main nao retorna valor")
             return_value = funcSymbolTable.get_ST("RETURN")
             return return_value
 
